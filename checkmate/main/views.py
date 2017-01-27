@@ -1,11 +1,12 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .models import User_Profile, Host
+from .models import User_Profile, Host, Question, City
 from .forms import Team_Form, Login_Form
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 import json
+from django.contrib.auth.decorators import login_required
 
 # For all views: status : 0 => Some probem, status : 1 => No problem
 def index(request):
@@ -80,7 +81,7 @@ def register(request):
 # View for Login
 def login(request):
 	if request.user.is_authenticated:
-		return redirect(request, '/main/')
+		return redirect('/main/')
 	
 	else:
 		if request.method == 'POST':
@@ -149,4 +150,14 @@ def login(request):
 
 		else:
 			form = Login_Form()
-			return redirect(request, 'main/register.html', {'form':form})
+			return render(request, 'main/register.html', {'form':form})
+
+# View for rulebook
+def rulebook(request):
+	return render(request, 'main/rulebook.html')
+
+#View for logging out
+@login_required
+def logout(request):
+	logout(request)
+	return redirect('/main/login.html')
