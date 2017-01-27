@@ -29,3 +29,19 @@ class Host(models.Model):
 
 	def __str__(self):
 		return self.host_name
+
+class Question(models.Model):
+	question_no = models.IntegerField()
+	difficulty_level = model.IntegerField()
+	content = models.CharField()
+	answer = models.CharField(max_length = 50)
+
+	def __str__(self):
+		return self.question_no
+
+class City(models.Model):
+	city_name = models.CharField(max_length = 50)
+	question_no = models.IntegerField()
+
+	def __str__(self):
+		return self.city_name + " - " + str(self.question_no)
