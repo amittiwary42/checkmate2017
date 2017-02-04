@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from .models import User_Profile, Host, Question, City
 from .forms import Team_Form, Login_Form
 from django.contrib.auth import authenticate, login, logout
@@ -161,3 +161,60 @@ def rulebook(request):
 def logout(request):
 	logout(request)
 	return redirect('/main/login.html')
+
+@login_required
+def display_question(request):
+	user = request.user
+	up = UserProfile.objects.get(user = user)
+
+	if up.allowed_to_play == 0 :
+		resp = {
+			'status' : 0,
+			'error_message' : "Time's up"
+		}
+		return HttpResponse(json.dumps(resp), content_type = "application/json")
+
+
+	if request.POST :
+		if str(request.POST.get('num')).isdigit():
+			number = int(request.POST.get('num'))
+		else:
+			raise Http404
+	else:
+		raise Http404
+
+	try:
+		question = Question.objects.get(question_no = number)
+		city = City.objects.get(question_number = number)
+	except:
+		raise Http404
+
+	trial = (int(number) - 1)
+	aq = up.attempted_questions.split()
+	cq = up.correct_questions.split()
+
+	if aq[trial] == 3 :
+		resp = {
+			'status' : 0,
+			'error_message' : 'You cannot attempt this question anymore.'
+		}
+		return HttpResponse(json.dumps(resp), content_type = "application/json")
+	
+	elif cq[trial] == 1:
+		resp = {
+			'status' : 0,
+			'error_message' : 'You cannot attempt this question anymore.'
+		}
+		return HttpResponse(json.dumps(resp), content_type = "application/json")
+
+	aq[trial] = str(int(aq[trial])+1)
+	up.attempted_questions = ' '.join(aq)
+	resp = {
+		'status': 1,
+		'question' : str(question.content),
+		'visited' : aq[trial]
+	}
+
+	up.save()
+
+	return HttpResponse(json.dumps(resp), content_type = "application/json")
