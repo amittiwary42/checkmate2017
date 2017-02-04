@@ -9,9 +9,20 @@ import json
 from django.contrib.auth.decorators import login_required
 
 # For all views: status : 0 => Some probem, status : 1 => No problem
+def test(request):
+	return HttpResponse('Is this working?')
+
 def index(request):
-	# Return a rendered response to send to the client.
-	return render(request, 'main/index.html')
+	if not request.user.is_authenticated() :
+		return redirect('/main/register')
+	else :
+		up = UserProfile.objects.get(user = request.user)
+		if up.allowed_to_play == 0:
+			resp = {
+				'status' : 0,
+				'error_message' : "Time's up"
+			}
+			return HttpResponse(json.dumps(resp), content_type = "application/json")
 
 # View for Registration
 def register(request):
