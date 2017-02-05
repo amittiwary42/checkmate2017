@@ -196,7 +196,7 @@ def display_question(request):
 
 	try:
 		question = Question.objects.get(question_no = number)
-		city = City.objects.get(question_number = number)
+		city = City.objects.get(question_no = number)
 	except:
 		raise Http404
 
