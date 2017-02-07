@@ -24,6 +24,9 @@ def index(request):
 			}
 			return HttpResponse(json.dumps(resp), content_type = "application/json")
 
+		else:
+			return render(request, 'main/retrofuture.html')
+
 # View for Registration
 def register(request):
 	if request.user.is_authenticated:
