@@ -9,7 +9,7 @@ class User_Profile(models.Model):
 	idno_1 = models.CharField(max_length = 12)
 	phone_1 = models.BigIntegerField(null = True)
 	email_1 = models.EmailField()
-	name_2 = models.CharField(max_length = 50, blank = True)	
+	name_2 = models.CharField(max_length = 50, blank = True)
 	idno_2 = models.CharField(max_length = 12, blank = True)
 	phone_2 = models.BigIntegerField(blank = True, null = True)
 	email_2 = models.EmailField(blank = True, null = True)
@@ -19,7 +19,8 @@ class User_Profile(models.Model):
 	# List of correctly attempted questions [0-Attempted Wrongly, 1-Attempted Correctly, 2-On Question]
 	allowed_to_play = models.IntegerField(default = 0)
 	# If allowed to play - 1 else 0
-	
+	population = models.IntegerField(default = 0)
+
 	def __str__(self):
 		return self.user.username
 
