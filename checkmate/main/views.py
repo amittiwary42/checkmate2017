@@ -31,28 +31,28 @@ def index(request):
 def register(request):
 	if request.user.is_authenticated:
 		retrun redirect('/main/')
-	
+
 	else:
 		if form.method == 'POST':
 			form = Team_Form(request.POST)
-			
+
 			if form.is_valid():
 				data = form.cleaned_data
-				
+
 				if not check_data(data): # check_data function to be made!!
-					resp = { 
+					resp = {
 						'status':0,
 						'error_message':'Form fields are not correct!! Please enter them properly.'
 					}
 					return HttpResponse(json.dumps(resp), content_type = "application/json")
-				
+
 				u = User()
 				u.username = data['team_name']
 				u.set_password = data['password']
-				
+
 				try:
 					u.save()
-				
+
 				except IntegrityError:
 					resp = {
 						'status':0,
@@ -76,13 +76,13 @@ def register(request):
 
 				resp = {
 					'status':1,
-					'message':'Successfully Registered', 
+					'message':'Successfully Registered',
 					'teamname' : up.team_name
 				}
 				return HttpResponse(json.dumps(resp), content_type = "application/json")
-			
+
 			else:
-				resp = { 
+				resp = {
 					'status':0,
 					'error_message':'Form fields are not correct. Enter them properly.'
 				}
@@ -96,28 +96,28 @@ def register(request):
 def login(request):
 	if request.user.is_authenticated:
 		return redirect('/main/')
-	
+
 	else:
 		if request.method == 'POST':
 			form = Login_Form(request.POST)
-			
+
 			if form.is_valid():
 				data = form.cleaned_data
 				team_name = data['team_name']
 				password = data['password']
 				user = authenticate(username = team_name, password = password)
-				
+
 				try:
 					up = User_Profile.objects.get(user = user)
 					host = Host.objects.get(host_name = "host")
-					
+
 					if host.play_allowed == 0:
 						resp = {
 							'status':0,
 							'error_message':'Game has not started yet!! Stay tuned to change the FUTURE!!'
 						}
 						return HttpResponse(json.dumps(resp), content_type = 'application/json')
-					
+
 					if up.allowed_to_play == 0:
 						resp = {
 							'status':0,
@@ -207,22 +207,22 @@ def display_question(request):
 	aq = up.attempted_questions.split()
 	cq = up.correct_questions.split()
 
-	if aq[trial] == 3 :
-		resp = {
-			'status' : 0,
-			'error_message' : 'You cannot attempt this question anymore.'
-		}
-		return HttpResponse(json.dumps(resp), content_type = "application/json")
-	
-	elif cq[trial] == 1:
+	if aq[trial] == '3' :
 		resp = {
 			'status' : 0,
 			'error_message' : 'You cannot attempt this question anymore.'
 		}
 		return HttpResponse(json.dumps(resp), content_type = "application/json")
 
-	aq[trial] = str(int(aq[trial])+1)
-	up.attempted_questions = ' '.join(aq)
+	elif cq[trial] == '1':
+		resp = {
+			'status' : 0,
+			'error_message' : 'You cannot attempt this question anymore.'
+		}
+		return HttpResponse(json.dumps(resp), content_type = "application/json")
+
+	#aq[trial] = str(int(aq[trial])+1)
+	#up.attempted_questions = ' '.join(aq)
 	resp = {
 		'status': 1,
 		'question' : str(question.content),
@@ -232,3 +232,72 @@ def display_question(request):
 	up.save()
 
 	return HttpResponse(json.dumps(resp), content_type = "application/json")
+
+	#View for the main game logic
+	@login_required
+	def answer(request):
+		user = request.user
+		up = UserProfile.objects.get(user = user)
+		if up.allowed_to_play == 0:
+			resp = {
+				'status' : 0,
+				'error_message' : "Time's up"
+			}
+			return HttpResponse(json.dumps(resp), content_type = "application/json")
+		if request.POST:
+			number = int(request.POST.get('num'))
+			answer = str(request.POST.get('answer'))
+			question = get_object_or_404(Question, number = number)
+			trial = (int(number)-1)
+			aq = up.attempted_questions.split()
+			cq = up.correct_questions.split()
+			if aq[trial] == '3' or cq[trial] == '1' :
+				raise Http404
+			answer = answer.lower()
+			if answer == question.answer:
+				cq[trial] = '1'
+				up.correct_questions = ' '.join(cq)
+				if question.difficulty_level == 1:
+					if aq[trial] == '0':
+						up.population += 30000
+					elif aq[trial] == '1':
+						up.population += 25000
+					elif aq[trial] == '2':
+						up.population += 20000
+				if question.difficulty_level == 2:
+					if aq[trial] == '0':
+						up.population += 30000
+					elif aq[trial] == '1':
+						up.population += 25000
+					elif aq[trial] == '2':
+						up.population += 20000
+				if question.difficulty_level == 3:
+					if aq[trial] == '0':
+						up.population += 30000
+					elif aq[trial] == '1':
+						up.population += 25000
+					elif aq[trial] == '2':
+						up.population += 20000
+				up.save()
+				#why print? (ref:pokemon checkmate)
+				resp = {
+					'status' : 1,
+					'population' : up.population,
+					#do we need to send visited and correct?
+				}
+				return HttpResponse(json.dumps(resp), content_type = "application/json")
+
+			else:
+				aq[trial] = str(int(aq[trial])+1)
+				up.attempted_questions = ' '.join(aq)
+				up.save()
+				resp = {
+					'status' : 0,
+					'population' : up.population
+				}
+				return HttpResponse(json.dumps(resp), content_type = "application/json")
+		else:
+			resp = {
+				'status' : 1
+			}
+			return HttpResponse(json.dumps(resp), content_type = "application/json")
