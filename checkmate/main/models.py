@@ -33,8 +33,8 @@ class Host(models.Model):
 
 class Question(models.Model):
 	question_no = models.IntegerField()
-	difficulty_level = model.IntegerField()
-	content = models.CharField()
+	difficulty_level = models.IntegerField()
+	content = models.CharField(max_length = 50)
 	answer = models.CharField(max_length = 50)
 
 	def __str__(self):
