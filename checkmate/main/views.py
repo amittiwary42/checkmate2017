@@ -20,7 +20,7 @@ def index(request):
 		if up.allowed_to_play == 0:
 			resp = {
 				'status' : 0,
-				'error_message' : "Time's up"
+				'message' : "Time's up"
 			}
 			return HttpResponse(json.dumps(resp), content_type = "application/json")
 		else:
@@ -40,7 +40,7 @@ def register(request):
 				if not check_data(data): # check_data function to be made!!
 					resp = {
 						'status':0,
-						'error_message':'Form fields are not correct!! Please enter them properly.'
+						'message':'Form fields are not correct!! Please enter them properly.'
 					}
 					return HttpResponse(json.dumps(resp), content_type = "application/json")
 
@@ -82,7 +82,7 @@ def register(request):
 			else:
 				resp = {
 					'status':0,
-					'error_message':'Form fields are not correct. Enter them properly.'
+					'message':'Form fields are not correct. Enter them properly.'
 				}
 				return HttpResponse(json.dumps(resp), content_typeif = "application/json")
 
@@ -112,21 +112,21 @@ def login(request):
 					if host.play_allowed == 0:
 						resp = {
 							'status':0,
-							'error_message':'Game has not started yet!! Stay tuned to change the FUTURE!!'
+							'message':'Game has not started yet!! Stay tuned to change the FUTURE!!'
 						}
 						return HttpResponse(json.dumps(resp), content_type = 'application/json')
 
 					if up.allowed_to_play == 0:
 						resp = {
 							'status':0,
-							'error_message':'Game has ended. Thanks for playing'
+							'message':'Game has ended. Thanks for playing'
 						}
 						return HttpResponse(json.dumps(resp), content_type = 'application/json')
 
 				except:
 					resp = {
 						'status':0,
-						'error_message':'Team Name or Password is incorrect!! Please try again.'
+						'message':'Team Name or Password is incorrect!! Please try again.'
 					}
 					return HttpResponse(json.dumps(resp), content_type = 'application/json')
 
@@ -142,21 +142,21 @@ def login(request):
 					else:
 						resp = {
 							'status':0,
-							'error_message':'Your account is inactive. Contact the site administrator'
+							'message':'Your account is inactive. Contact the site administrator'
 						}
 						return HttpResponse(json.dumps(resp), content_type = 'application/json')
 
 				else:
 					resp = {
 						'status':0,
-						'error_message':'Your Team Name or Password was incorrect!! Please try again.'
+						'message':'Your Team Name or Password was incorrect!! Please try again.'
 					}
 					return HttpResponse(json.dumps(resp), content_type = 'application/json')
 
 			else:
 				resp = {
 					'status':0,
-					'error_message':'Your form credentials are not valid!! Please try again.'
+					'message':'Your form credentials are not valid!! Please try again.'
 				}
 				return HttpResponse(json.dumps(resp), content_type = 'application/json')
 
@@ -182,7 +182,7 @@ def display_question(request):
 	if up.allowed_to_play == 0 :
 		resp = {
 			'status' : 0,
-			'error_message' : "Time's up"
+			'message' : "Time's up"
 		}
 		return HttpResponse(json.dumps(resp), content_type = "application/json")
 
@@ -208,14 +208,14 @@ def display_question(request):
 	if aq[trial] == '3' :
 		resp = {
 			'status' : 0,
-			'error_message' : 'You cannot attempt this question anymore.'
+			'message' : 'You cannot attempt this question anymore.'
 		}
 		return HttpResponse(json.dumps(resp), content_type = "application/json")
 
 	elif cq[trial] == '1':
 		resp = {
 			'status' : 0,
-			'error_message' : 'You cannot attempt this question anymore.'
+			'message' : 'You cannot attempt this question anymore.'
 		}
 		return HttpResponse(json.dumps(resp), content_type = "application/json")
 
@@ -239,7 +239,7 @@ def answer(request):
 	if up.allowed_to_play == 0:
 		resp = {
 			'status' : 0,
-			'error_message' : "Time's up"
+			'message' : "Time's up"
 		}
 		return HttpResponse(json.dumps(resp), content_type = "application/json")
 	if request.POST:
