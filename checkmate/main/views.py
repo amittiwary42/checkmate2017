@@ -23,15 +23,13 @@ def index(request):
 				'error_message' : "Time's up"
 			}
 			return HttpResponse(json.dumps(resp), content_type = "application/json")
-
 		else:
-			return render(request, 'main/register.html')
+			return render(request, 'main/index.html')
 
 # View for Registration
 def register(request):
 	if request.user.is_authenticated:
 		return redirect('/main/')
-
 	else:
 		if form.method == 'POST':
 			form = Team_Form(request.POST)
@@ -233,71 +231,71 @@ def display_question(request):
 
 	return HttpResponse(json.dumps(resp), content_type = "application/json")
 
-	#View for the main game logic
-	@login_required
-	def answer(request):
-		user = request.user
-		up = UserProfile.objects.get(user = user)
-		if up.allowed_to_play == 0:
+#View for the main game logic
+@login_required
+def answer(request):
+	user = request.user
+	up = UserProfile.objects.get(user = user)
+	if up.allowed_to_play == 0:
+		resp = {
+			'status' : 0,
+			'error_message' : "Time's up"
+		}
+		return HttpResponse(json.dumps(resp), content_type = "application/json")
+	if request.POST:
+		number = int(request.POST.get('num'))
+		answer = str(request.POST.get('answer'))
+		question = get_object_or_404(Question, number = number)
+		trial = (int(number)-1)
+		aq = up.attempted_questions.split()
+		cq = up.correct_questions.split()
+		if aq[trial] == '3' or cq[trial] == '1' :
+			raise Http404
+		answer = answer.lower()
+		if answer == question.answer:
+			cq[trial] = '1'
+			up.correct_questions = ' '.join(cq)
+			if question.difficulty_level == 1:
+				if aq[trial] == '0':
+					up.population += 30000
+				elif aq[trial] == '1':
+					up.population += 25000
+				elif aq[trial] == '2':
+					up.population += 20000
+			if question.difficulty_level == 2:
+				if aq[trial] == '0':
+					up.population += 30000
+				elif aq[trial] == '1':
+					up.population += 25000
+				elif aq[trial] == '2':
+					up.population += 20000
+			if question.difficulty_level == 3:
+				if aq[trial] == '0':
+					up.population += 30000
+				elif aq[trial] == '1':
+					up.population += 25000
+				elif aq[trial] == '2':
+					up.population += 20000
+			up.save()
+			#why print? (ref:pokemon checkmate)
+			resp = {
+				'status' : 1,
+				'population' : up.population,
+				#do we need to send visited and correct?
+			}
+			return HttpResponse(json.dumps(resp), content_type = "application/json")
+
+		else:
+			aq[trial] = str(int(aq[trial])+1)
+			up.attempted_questions = ' '.join(aq)
+			up.save()
 			resp = {
 				'status' : 0,
-				'error_message' : "Time's up"
+				'population' : up.population
 			}
 			return HttpResponse(json.dumps(resp), content_type = "application/json")
-		if request.POST:
-			number = int(request.POST.get('num'))
-			answer = str(request.POST.get('answer'))
-			question = get_object_or_404(Question, number = number)
-			trial = (int(number)-1)
-			aq = up.attempted_questions.split()
-			cq = up.correct_questions.split()
-			if aq[trial] == '3' or cq[trial] == '1' :
-				raise Http404
-			answer = answer.lower()
-			if answer == question.answer:
-				cq[trial] = '1'
-				up.correct_questions = ' '.join(cq)
-				if question.difficulty_level == 1:
-					if aq[trial] == '0':
-						up.population += 30000
-					elif aq[trial] == '1':
-						up.population += 25000
-					elif aq[trial] == '2':
-						up.population += 20000
-				if question.difficulty_level == 2:
-					if aq[trial] == '0':
-						up.population += 30000
-					elif aq[trial] == '1':
-						up.population += 25000
-					elif aq[trial] == '2':
-						up.population += 20000
-				if question.difficulty_level == 3:
-					if aq[trial] == '0':
-						up.population += 30000
-					elif aq[trial] == '1':
-						up.population += 25000
-					elif aq[trial] == '2':
-						up.population += 20000
-				up.save()
-				#why print? (ref:pokemon checkmate)
-				resp = {
-					'status' : 1,
-					'population' : up.population,
-					#do we need to send visited and correct?
-				}
-				return HttpResponse(json.dumps(resp), content_type = "application/json")
-
-			else:
-				aq[trial] = str(int(aq[trial])+1)
-				up.attempted_questions = ' '.join(aq)
-				up.save()
-				resp = {
-					'status' : 0,
-					'population' : up.population
-				}
-				return HttpResponse(json.dumps(resp), content_type = "application/json")
-		else:
-			resp = {
-				'status' : 1
-			}
-			return HttpResponse(json.dumps(resp), content_type = "application/json")
+	else:
+		resp = {
+			'status' : 1
+		}
+		return HttpResponse(json.dumps(resp), content_type = "application/json")
