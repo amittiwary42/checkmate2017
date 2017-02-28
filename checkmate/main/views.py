@@ -14,7 +14,7 @@ def test(request):
 
 def index(request):
 	if not request.user.is_authenticated() :
-		return render(request, 'main/register.html')
+		return redirect('/main/register')
 	else :
 		up = UserProfile.objects.get(user = request.user)
 		if up.allowed_to_play == 0:
@@ -28,10 +28,10 @@ def index(request):
 
 # View for Registration
 def register(request):
-	if request.user.is_authenticated:
+	if request.user.is_authenticated():
 		return redirect('/main/')
 	else:
-		if form.method == 'POST':
+		if request.method == 'POST':
 			form = Team_Form(request.POST)
 
 			if form.is_valid():
