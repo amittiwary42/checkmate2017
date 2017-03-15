@@ -32,16 +32,76 @@
 
 
 	<div class="contents">
-
-		<div class = "form_container">
-			<form class ="form_class" action = "/" method = "post">
-			<input type="text" name="user" placeholder="username" />
+				<form class ="form_class" id="register" method = "post">
+                <div class="form-group">
+                    <div class="row">
+                    <div class="col-sm-6">
+                    <input data-check="name" type="text" name="team_name" id="team_name" tabindex="2" class="form-control" placeholder="Team Name" value="" required>
+                    </div>
+                  </div>
+                  </div>
+	    	        <div class="form-group">
+                    <div class="row">
+                    <div class="col-sm-6">
+                    <input data-check="name" type="text" name="name_1" id="username_1" tabindex="2" class="form-control" placeholder="Name" value="" required>
+                    </div>
+                    <div class="col-sm-6">
+                    <input data-check="name" type="text" name="name_2" id="username_2" tabindex="3" class="form-control" placeholder="Name" value="" required>
+                    </div>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <div class="row">
+                    <div class="col-sm-6">
+                     <input data-check="email" type="email" name="email_1" id="email_1" tabindex="4" class="form-control" placeholder="Email Address" value="" required>
+                    </div>
+                    <div class="col-sm-6">
+                     <input data-check="email" type="email" name="email_2" id="email_2" tabindex="5" class="form-control" placeholder="Email Address" value="" required>
+                    </div>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <div class="row">
+                    <div class="col-sm-6">
+                    <input data-check="phone" type="text" name="phone_1" id="phone_1" tabindex="6" class="form-control" placeholder="Phone No." value="" required>
+                    </div>
+                    <div class="col-sm-6">
+                    <input data-check="phone" type="text" name="phone_2" id="phone_2" tabindex="7" class="form-control" placeholder="Phone No." value="" required>
+                    </div>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <div class="row">
+                    <div class="col-sm-6">
+                    <input data-check="idNo" type="text" name="idno_1" id="idno_1" tabindex="6" class="form-control" placeholder="ID (Eg.2014A7PS077P)" value="" required>
+                    </div>
+                    <div class="col-sm-6">
+                    <input data-check="idNo" type="text" name="idno_2" id="idno_2" tabindex="7" class="form-control" placeholder="ID (Eg.2014A7PS077P)" value="" required>
+                    </div>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <input type="password" name="password" id="password" tabindex="8" class="form-control" placeholder="Password" required>
+                  </div>
+                  <div class="form-group">
+                    <input type="password" name="confirm_password" id="confirm_password" tabindex="9" class="form-control" placeholder="Confirm Password" required>
+                  </div>
+                  <div class="form-group">
+                    <div class="row">
+                      <div class="col-sm-12">
+                        <input type="submit" name="register-submit" id="register-submit" tabindex="10" class="form-control btn btn-register" value="Register Now">
+                      </div>
+                    </div>
+                  </div>
+                </form>
+		<div class = "form_login" id="login">
+			<form class ="form_class" method = "post">
+			<input type="text" name="team_name" placeholder="Teamname" />
 			<br>
 			
-			<input type="password" name="pass" placeholder="password"/>
+			<input type="password" name="password" placeholder="Password"/>
 			<br>
 			<button type="Submit"> Submit </button>
-			<!-- WE COULD ALSO WRITE: <input type="Submit"> -->
 			</form>
 		</div>
 
@@ -60,6 +120,108 @@
 	</div>
 
 </div>
+<script type="text/javascript">
+	var data={};
+	$('#register').submit(function(e){
+		e.preventDefault();
+		var a = $(this).serializeArray();
+		$.each(a,function(i,key){
+			data[key.name]=key.value;
+		});
+		//check_data();
+		if(){
+		$.ajax({
+			method:"POST",
+			url:'./register/',
+			data:data,
+			success:function(res){
+				if(res.status == 0){
+					alert(res.message);
+				}
+				if(res.status == 1){
+					alert(res.message + "\nTeam Name: " +res.teamname);
 
+				}
+			};}
+		})
+	/*function check_data(){
+
+        var teamReg = /[\s]/;
+        var team = $('#team-name').val();
+        var teamTest = teamReg.test(team);
+
+        var phoVal1 = $('#phone_1').val();
+        var phoVal2 = $('#phone_2').val();
+        var phoReg = /^([0-9]{10})$/;
+        var phoTest = phoReg.test(phoVal1) && phoReg.test(phoVal2);
+
+        var emaVal1 = $('#email_1').val();
+        var emaVal2 = $('#email_2').val();
+        var emaReg = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/;
+        var emaTest = emaReg.test(emaVal1) && emaReg.test(emaVal2);
+
+        var name1 = $('#username_1').val();
+        var name2 = $('#username_2').val();
+        var nameReg = /^[A-z\s]{3,}$/;
+        var nameTest = nameReg.test(name1) && nameReg.test(name2);
+
+        var idno1 = $('#idno_1').val();
+        var idno2 =  $('#idno_2').val();
+        var idReg=/201[1-6][AB][1-578B][APT][1-578S]\d\d\dP/;
+        var idTest = idReg.test(idno1) && idReg.test(idno2);
+
+        if(teamTest){
+          alert('White Space not allowed');
+          return false;
+        }
+
+        if(team.length>20){
+          alert('Team Name must be shorter than 20 characters');
+          return false;
+        }
+        if(!phoTest){
+          alert("Invalid Phone Number");
+          return false;
+        }
+        if(!emaTest){
+          alert("Invalid Email Id");
+          return false;
+        }
+        if(!idTest){
+          alert('Invalid BITS Id');
+          return false;
+        }
+
+
+        if(!nameTest){
+          alert("Invalid Name");
+          return false;
+        }
+        console.log('all fine');
+        return true;
+}*/
+
+	$('#login').submit(function(e){
+		e.preventDefault();
+		var a = $(this).serializeArray();
+		$.each(a,function(i,key){
+			data[key.name]=key.value;
+		});
+		$.ajax({
+			method:"POST",
+			url:'./register/',
+			data:data,
+			success:function(res){
+				if(res.status == 0){
+					window.alert(res.message);
+				}
+				if(res.status == 1){
+					//window.alert(res.message);
+          location.href="./index/"
+				}
+			};
+		})
+	})
+</script>
 </body>
 </html>
