@@ -13,9 +13,11 @@ from django.contrib.auth import login as auth_login
 from django.views.decorators.csrf import csrf_protect
 
 # For all views: status : 0 => Some probem, status : 1 => No problem
+@csrf_exempt
 def test(request):
 	return HttpResponse('Is this working?')
 
+@csrf_exempt
 def index(request):
 	if not request.user.is_authenticated():
 		return redirect('/main/register/')
@@ -25,12 +27,9 @@ def index(request):
 			resp = {
 				'status' : 0,
 				'message' : "Time's up"
-
 			}
 			return HttpResponse(json.dumps(resp), content_type = "application/json")
 		else:
-			#send attempted questions and correct questions
-			
 			return render(request, 'main/index.html')
 
 # View for Registration
@@ -188,11 +187,13 @@ def login(request):
 			return render(request, 'main/register.html', {'form':form})
 
 # View for rulebook
+@csrf_exempt
 def rulebook(request):
 	return render(request, 'main/rulebook.html')
 
 #View for logging out
 @login_required
+@csrf_exempt
 def logout(request):
 	logout(request)
 	return redirect('/main/login.html')
@@ -252,7 +253,6 @@ def display_question(request):
 		'question' : str(question.content),
 		'visited' : aq[trial]
 	}
-
 	up.save()
 
 	return HttpResponse(json.dumps(resp), content_type = "application/json")
@@ -329,3 +329,23 @@ def answer(request):
 			'status' : 1
 		}
 		return HttpResponse(json.dumps(resp), content_type = "application/json")
+
+@login_required
+@csrf_exempt
+def get_details(request):
+	print('get details')
+	user = request.user
+	try :
+		up = User_Profile.objects.get(user = user)
+	except :
+		raise Http404
+	# still remaining status
+
+	resp = {
+		'status' : 1,
+		'teamname' : up.team_name,
+		'attempted_questions' : up.attempted_questions,
+		'correct_questions' : up.correct_questions,
+		'population' : up.population
+	}
+	return HttpResponse(json.dumps(resp), content_type = "application/json")

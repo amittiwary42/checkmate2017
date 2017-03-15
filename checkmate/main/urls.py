@@ -12,4 +12,5 @@ urlpatterns = [
 	url(r'^rulebook', views.rulebook, name='rulebook'),
 	url(r'^display_question', views.display_question, name = 'display_question'),
 	url(r'^answer', views.answer, name = 'answer'),
+	url(r'^get_details', views.get_details, name = 'get_details'),
 ]
