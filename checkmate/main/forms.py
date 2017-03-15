@@ -5,6 +5,7 @@ from .models import *
 class Team_Form(forms.Form):
 	team_name = forms.CharField(max_length = 50,label = 'Team Name:')
 	password = forms.CharField(widget = forms.PasswordInput(), max_length = 50)
+	confirm_password = forms.CharField(widget = forms.PasswordInput(), max_length = 50)
 	name_1 = forms.CharField(max_length = 50,label = 'Name of 1st Participant:')
 	idno_1 = forms.CharField(max_length = 12)
 	phone_1 = forms.IntegerField(widget = forms.TextInput(), min_value = 6000000000, label = 'Phone No. of 1st Participant:')
