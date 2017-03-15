@@ -38,7 +38,7 @@ class Question(models.Model):
 	answer = models.CharField(max_length = 50)
 
 	def __str__(self):
-		return self.question_no
+		return str(self.question_no)
 
 class City(models.Model):
 	city_name = models.CharField(max_length = 50)

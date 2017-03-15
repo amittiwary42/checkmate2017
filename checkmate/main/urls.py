@@ -11,4 +11,5 @@ urlpatterns = [
 	url(r'^logout', views.logout, name='logout'),
 	url(r'^rulebook', views.rulebook, name='rulebook'),
 	url(r'^display_question', views.display_question, name = 'display_question'),
+	url(r'^answer', views.answer, name = 'answer'),
 ]
