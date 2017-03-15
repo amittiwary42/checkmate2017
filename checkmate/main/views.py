@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, Http404
 from .models import User_Profile, Host, Question, City
 from .forms import Team_Form, Login_Form
@@ -7,29 +7,37 @@ from django.contrib.auth.models import User
 from django.db import IntegrityError
 import json
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+from .controls import *
+from django.contrib.auth import login as auth_login
+from django.views.decorators.csrf import csrf_protect
 
 # For all views: status : 0 => Some probem, status : 1 => No problem
 def test(request):
 	return HttpResponse('Is this working?')
 
 def index(request):
-	if not request.user.is_authenticated() :
-		return redirect('/main/register')
+	if not request.user.is_authenticated():
+		return redirect('/main/register/')
 	else :
-		up = UserProfile.objects.get(user = request.user)
+		up = User_Profile.objects.get(user = request.user)
 		if up.allowed_to_play == 0:
 			resp = {
 				'status' : 0,
 				'message' : "Time's up"
+
 			}
 			return HttpResponse(json.dumps(resp), content_type = "application/json")
 		else:
+			#send attempted questions and correct questions
+			
 			return render(request, 'main/index.html')
 
 # View for Registration
+@csrf_exempt
 def register(request):
 	if request.user.is_authenticated():
-		return redirect('/main/')
+		return redirect('/main/login/')
 	else:
 		if request.method == 'POST':
 			form = Team_Form(request.POST)
@@ -37,20 +45,28 @@ def register(request):
 			if form.is_valid():
 				data = form.cleaned_data
 
-				if not check_data(data): # check_data function to be made!!
+				if not check_data(data):
 					resp = {
 						'status':0,
 						'message':'Form fields are not correct!! Please enter them properly.'
 					}
 					return HttpResponse(json.dumps(resp), content_type = "application/json")
-
-				u = User()
-				u.username = data['team_name']
-				u.set_password = data['password']
-
+				
+				if(data['password'] != data['confirm_password']):
+					resp = {
+						'status':0,
+						'message':'Password fields do not match. Re-enter password.'
+					}
+					return HttpResponse(json.dumps(resp), content_type = "application/json")
+				# print(data['password'])
+				u = User.objects.create_user(
+					username = data['team_name'],
+					password = data['password'],
+					email = data['email_1']
+				)
 				try:
 					u.save()
-
+					print(u.has_usable_password())
 				except IntegrityError:
 					resp = {
 						'status':0,
@@ -84,15 +100,16 @@ def register(request):
 					'status':0,
 					'message':'Form fields are not correct. Enter them properly.'
 				}
-				return HttpResponse(json.dumps(resp), content_typeif = "application/json")
+				return HttpResponse(json.dumps(resp), content_type = "application/json")
 
 		else :
 			form = Team_Form()
 			return render(request, 'main/register.html', {'form' : form})
 
 # View for Login
+@csrf_exempt
 def login(request):
-	if request.user.is_authenticated:
+	if request.user.is_authenticated():
 		return redirect('/main/')
 
 	else:
@@ -100,19 +117,25 @@ def login(request):
 			form = Login_Form(request.POST)
 
 			if form.is_valid():
+				print('form is valid')
 				data = form.cleaned_data
 				team_name = data['team_name']
 				password = data['password']
+				print(team_name)
 				user = authenticate(username = team_name, password = password)
 
 				try:
+					print("entered try")
 					up = User_Profile.objects.get(user = user)
+					print("got up")
 					host = Host.objects.get(host_name = "host")
-
+					print("authenticated")
+					print(up)
+					print(host)
 					if host.play_allowed == 0:
 						resp = {
 							'status':0,
-							'message':'Game has not started yet!! Stay tuned to change the FUTURE!!'
+							'message':'Game has not started yet!! Stay tuned!!'
 						}
 						return HttpResponse(json.dumps(resp), content_type = 'application/json')
 
@@ -132,13 +155,13 @@ def login(request):
 
 				if user is not None:
 					if user.is_active:
-						login(request, user)
-						resp = {
-							'status':1,
-							'message':'Login Successful'
-						}
-						return HttpResponse(json.dumps(resp), content_type = 'application/json')
-
+						auth_login(request, user)
+						# resp = {
+							# 'status':1,
+							# 'message':'Login Successful'
+						# }
+						# return HttpResponse(json.dumps(resp), content_type = 'application/json')
+						return redirect('/main/index/')
 					else:
 						resp = {
 							'status':0,
@@ -175,9 +198,10 @@ def logout(request):
 	return redirect('/main/login.html')
 
 @login_required
+@csrf_exempt
 def display_question(request):
 	user = request.user
-	up = UserProfile.objects.get(user = user)
+	up = User_Profile.objects.get(user = user)
 
 	if up.allowed_to_play == 0 :
 		resp = {
@@ -187,18 +211,20 @@ def display_question(request):
 		return HttpResponse(json.dumps(resp), content_type = "application/json")
 
 
-	if request.POST :
-		if str(request.POST.get('num')).isdigit():
-			number = int(request.POST.get('num'))
+	if request.POST:
+		if str(request.POST.get('no')).isdigit():
+			number = int(request.POST.get('no'))
 		else:
+			print("from point1")
 			raise Http404
 	else:
 		raise Http404
-
+	print(number)
 	try:
 		question = Question.objects.get(question_no = number)
 		city = City.objects.get(question_no = number)
 	except:
+		print("from point2")
 		raise Http404
 
 	trial = (int(number) - 1)
@@ -233,9 +259,11 @@ def display_question(request):
 
 #View for the main game logic
 @login_required
+@csrf_exempt
 def answer(request):
+	print("Entered Answer")
 	user = request.user
-	up = UserProfile.objects.get(user = user)
+	up = User_Profile.objects.get(user = user)
 	if up.allowed_to_play == 0:
 		resp = {
 			'status' : 0,
@@ -243,9 +271,11 @@ def answer(request):
 		}
 		return HttpResponse(json.dumps(resp), content_type = "application/json")
 	if request.POST:
-		number = int(request.POST.get('num'))
-		answer = str(request.POST.get('answer'))
-		question = get_object_or_404(Question, number = number)
+		number = int(request.POST.get('no'))
+		answer = str(request.POST.get('ans'))
+		print("answer")
+		print(request.POST)
+		question = get_object_or_404(Question, question_no = number)
 		trial = (int(number)-1)
 		aq = up.attempted_questions.split()
 		cq = up.correct_questions.split()
