@@ -40,9 +40,9 @@ class Question(models.Model):
 	def __str__(self):
 		return str(self.question_no)
 
-class City(models.Model):
-	city_name = models.CharField(max_length = 50)
-	question_no = models.IntegerField()
+# class City(models.Model):
+# 	city_name = models.CharField(max_length = 50)
+# 	question_no = models.IntegerField()
 
-	def __str__(self):
-		return self.city_name + " - " + str(self.question_no)
+# 	def __str__(self):
+# 		return self.city_name + " - " + str(self.question_no)

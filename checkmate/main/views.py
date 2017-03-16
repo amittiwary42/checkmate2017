@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, Http404
-from .models import User_Profile, Host, Question, City
+from .models import User_Profile, Host, Question#, City
 from .forms import Team_Form, Login_Form
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -223,7 +223,7 @@ def display_question(request):
 	print(number)
 	try:
 		question = Question.objects.get(question_no = number)
-		city = City.objects.get(question_no = number)
+		# city = City.objects.get(question_no = number)
 	except:
 		print("from point2")
 		raise Http404
@@ -287,25 +287,25 @@ def answer(request):
 			up.correct_questions = ' '.join(cq)
 			if question.difficulty_level == 1:
 				if aq[trial] == '0':
-					up.population += 30000
+					up.population += 10000
 				elif aq[trial] == '1':
-					up.population += 25000
+					up.population += 5000
 				elif aq[trial] == '2':
-					up.population += 20000
+					up.population += 2000
 			if question.difficulty_level == 2:
 				if aq[trial] == '0':
-					up.population += 30000
-				elif aq[trial] == '1':
-					up.population += 25000
-				elif aq[trial] == '2':
 					up.population += 20000
+				elif aq[trial] == '1':
+					up.population += 10000
+				elif aq[trial] == '2':
+					up.population += 4000
 			if question.difficulty_level == 3:
 				if aq[trial] == '0':
 					up.population += 30000
 				elif aq[trial] == '1':
-					up.population += 25000
+					up.population += 15000
 				elif aq[trial] == '2':
-					up.population += 20000
+					up.population += 6000
 			up.save()
 			#why print? (ref:pokemon checkmate)
 			resp = {
